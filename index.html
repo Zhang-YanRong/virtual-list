@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .infinite-list-container {
+      width: 200px;
+      height: 500px;
+      background-color: pink;
+      overflow: auto;
+    }
+
+    .infinite-list {
+      width: 100%;
+      height: auto;
+      overflow: hidden;
+      background-color: transparent;
+      list-style: none;
+    }
+  </style>
+</head>
+<body>
+  <button id="button">button</button><br>
+  <!-- 可视区域 -->
+  <div class="infinite-list-container">
+    <!-- 为容器内的占位，高度为总列表高度，用于形成滚动条 -->
+    <div class="infinite-list-phantom">
+
+    <!-- 渲染区域 -->
+    <ul class="infinite-list">
+    </ul>
+  </div>
+  </div>
+
+
+  <script src="jquery-1.12.4.min.js"></script>
+</body>
+</html>
+<script>
+  let start = 0
+  let dataList = []
+  let height = '20'
+  let startOffset = 0
+  let visibleCount = Math.ceil($('.infinite-list-container').height() / height )
+  let end = start + visibleCount
+  let transform = `translate3d(0,${startOffset}px,0)`
+  let visibleData = dataList.slice(start, Math.min(end, dataList.length))
+  let bufferScale = 0.5
+  let aboveCount = Math.min(start,bufferScale * visibleCount)
+  let belowCount = Math.min(dataList.length - end, bufferScale * visibleCount)
+  $('.infinite-list-item').css({'height': height + 'px', 'line-height': height + 'px'})
+  document.getElementById('button').addEventListener('click',function(){
+    // 记录任务开始时间
+    let now = Date.now();
+    // 插入一万条数据
+    const total = 10000;
+
+    $('.infinite-list-phantom').height(total * height)
+
+
+    // 获取容器
+    let ul = document.getElementById('container');
+    // 将数据插入容器中
+    for (let i = 0; i < total; i++) {
+        // let li = document.createElement('li');
+        // li.innerText = 
+        // ul.appendChild(li);
+        dataList.push(~~(Math.random() * total))
+    }
+
+    visibleCount = Math.ceil($('.infinite-list-container').height() / height )
+    end = start + visibleCount
+    visibleData = dataList.slice(start, Math.min(end, dataList.length))
+
+    for (let i = 0; i < visibleData.length; i++) {
+        $('.infinite-list').append(`<li class="infinite-list-item">${visibleData[i]}</li>`);
+    }
+
+    console.log('JS运行时间：',Date.now() - now);
+    setTimeout(()=>{
+      console.log('总运行时间：',Date.now() - now);
+    },0)
+
+    // print JS运行时间： 38
+    // print 总运行时间： 957 
+  })
+
+  document.querySelector('.infinite-list-container').addEventListener('scroll', function(){
+    let scrollTop  = $(this).scrollTop()
+    start = Math.floor(scrollTop / 20)
+    end = start + visibleCount
+    startOffset = scrollTop - (scrollTop % 20)
+    console.log(start, end)
+    // visibleCount = Math.ceil($('.infinite-list-container').height() / height )
+    // end = start + visibleCount
+    visibleData = dataList.slice(start, Math.min(end, dataList.length))
+    $('.infinite-list').html('')
+
+    for (let i = 0; i < visibleData.length; i++) {
+        $('.infinite-list').append(`<li class="infinite-list-item">${visibleData[i]}</li>`);
+    }
+
+    transform = `translate3d(0,${startOffset}px,0)`
+    $('.infinite-list').css('transform', transform)
+  })
+
+console.log($('.infinite-list'))
+</script>
